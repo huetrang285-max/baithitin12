@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Luyện Thi Trắc Nghiệm Tin Học 12</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            background-color: #ffffff;
+            width: 100%;
+            max-width: 850px;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        h2 { text-align: center; color: #1a365d; margin-bottom: 5px; }
+        .subtitle { text-align: center; color: #718096; margin-bottom: 25px; font-size: 15px; }
+        
+        /* Form Đăng Nhập */
+        .login-box {
+            background-color: #ebf8ff;
+            border: 2px solid #3182ce;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #2d3748;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #cbd5e0;
+            border-radius: 6px;
+            font-size: 15px;
+            box-sizing: border-box;
+        }
+
+        .section-header {
+            background-color: #e2e8f0;
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-weight: bold;
+            color: #2d3748;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+        .question-card {
+            background: #fff;
+            border: 1px solid #cbd5e0;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 15px;
+        }
+        .q-title { font-weight: bold; font-size: 15px; color: #2d3748; margin-bottom: 10px; }
+        
+        .options-group { display: flex; flex-direction: column; gap: 8px; }
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .option-label:hover { background-color: #ebf8ff; }
+        .option-label input { margin-right: 10px; }
+
+        .tf-table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+        .tf-table th, .tf-table td { border: 1px solid #cbd5e0; padding: 8px; text-align: left; }
+        .tf-table th { background-color: #f7fafc; text-align: center; }
+        .tf-radio { text-align: center; width: 60px; }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            background-color: #3182ce;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        .btn:hover { background-color: #2b6cb0; }
+        .btn-export { background-color: #dd6b20; margin-top: 10px; }
+        .btn-export:hover { background-color: #c05621; }
+        .btn-reload { background-color: #38a169; margin-top: 10px; }
+        .btn-reload:hover { background-color: #2f855a; }
+
+        .result-box { text-align: center; padding: 20px; background: #ebf8ff; border-radius: 8px; margin-top: 20px; }
+        .score-display { font-size: 24px; font-weight: bold; color: #2b6cb0; margin: 10px 0; }
+        .student-info-display { font-size: 18px; color: #2d3748; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>HỆ THỐNG ĐỀ THI TRẮC NGHIỆM TIN HỌC 12</h2>
+    <div class="subtitle">Cấu trúc: 24 câu trắc nghiệm 4 lựa chọn + 4 câu hỏi Đúng/Sai</div>
+
+    <!-- 1. KHỐI ĐĂNG NHẬP THÔNG TIN HỌC SINH -->
+    <div id="login-section" class="login-box">
+        <h3 style="margin-top:0; color:#2b6cb0; text-align:center;">THÔNG TIN THÍ SINH</h3>
+        <div class="form-group">
+            <label for="student-name">Họ và Tên Học Sinh (*):</label>
+            <input type="text" id="student-name" placeholder="Ví dụ: Nguyễn Văn An" required>
+        </div>
+        <div class="form-group">
+            <label for="student-class">Lớp (*):</label>
+            <select id="student-class">
+                <option value="">-- Chọn Lớp --</option>
+                <option value="12A1">12A1</option>
+                <option value="12A2">12A2</option>
+                <option value="12A3">12A3</option>
+                <option value="12A4">12A4</option>
+                <option value="12A5">12A5</option>
+            </select>
+        </div>
+        <button type="button" class="btn" onclick="startExam()">Bắt Đầu Làm Bài</button>
+    </div>
+
+    <!-- 2. KHỐI BÀI THI -->
+    <form id="quiz-form" style="display: none;">
+        <div class="section-header">PHẦN I. CÂU HỎI TRẮC NGHIỆM (24 câu)</div>
+        <div id="part1-container"></div>
+
+        <div class="section-header">PHẦN II. CÂU HỎI ĐÚNG / SAI (4 câu - Mỗi câu 4 ý a, b, c, d)</div>
+        <div id="part2-container"></div>
+
+        <button type="button" class="btn" onclick="submitQuiz()">Nộp Bài Bắt Đầu Chấm Điểm</button>
+    </form>
+
+    <!-- 3. KHỐI HIỂN THỊ KẾT QUẢ CHO GIÁO VIÊN VÀ HỌC SINH -->
+    <div id="result-area" class="result-box" style="display: none;">
+        <h3>KẾT QUẢ BÀI LÀM</h3>
+        <div class="student-info-display" id="res-student-info">Thí sinh: - | Lớp: -</div>
+        <div class="score-display" id="score-text">0/0</div>
+        <p id="feedback-text"></p>
+        
+        <button type="button" class="btn btn-export" onclick="exportToCSV()">Tải File Điểm CSV Để Nộp Cho Giáo Viên</button>
+        <button type="button" class="btn btn-reload" onclick="resetExam()">Làm Bài Thi Mới</button>
+    </div>
+</div>
+
+<script>
+    // NGÂN HÀNG CÂU HỎI PHẦN I (24 CÂU)
+    const bankPart1 = [
+        { q: "Giao thức TCP/IP trong mạng Internet có vai trò chính là gì?", options: ["Truyền năng lượng điện", "Đảm bảo quy tắc đóng gói, ghi địa chỉ và truyền gói tin chính xác", "Soạn thảo văn bản", "Dịch thuật tự động"], correct: "Đảm bảo quy tắc đóng gói, ghi địa chỉ và truyền gói tin chính xác" },
+        { q: "Thành phần IP trong bộ giao thức TCP/IP chịu trách nhiệm làm gì?", options: ["Chia nhỏ dữ liệu", "Gắn địa chỉ và định tuyến đường đi cho gói tin", "Kiểm tra lỗi mất gói", "Xếp lại dữ liệu"], correct: "Gắn địa chỉ và định tuyến đường đi cho gói tin" },
+        { q: "Thành phần TCP trong bộ giao thức TCP/IP chịu trách nhiệm làm gì?", options: ["Chia nhỏ dữ liệu thành các gói tin mini và kiểm đếm lắp ráp tại đích", "Gắn địa chỉ IP", "Định tuyến đường đi", "Phát sóng Wi-Fi"], correct: "Chia nhỏ dữ liệu thành các gói tin mini và kiểm đếm lắp ráp tại đích" },
+        { q: "Thiết bị nào đóng vai trò chuyển mạch trung tâm kết nối các VLAN trong mạng LAN trường học?", options: ["Core Switch", "Bàn phím", "Máy in", "Chuột không dây"], correct: "Core Switch" },
+        { q: "Nguy cơ lớn nhất khi giao toàn quyền quyết định cho AI điều khiển vũ khí sát thương là gì?", options: ["AI không có khả năng đạo đức, lòng trắc ẩn và dễ gặp sự cố ngoài kiểm soát", "Tốn ít điện", "Chạy quá nhanh", "Không tốn chi phí"], correct: "AI không có khả năng đạo đức, lòng trắc ẩn và dễ gặp sự cố ngoài kiểm soát" },
+        { q: "Ứng dụng nào sau đây của AI sử dụng xử lý hình ảnh trực tiếp?", options: ["Face ID mở khóa điện thoại", "Soạn thảo văn bản thuần túy", "Tính tổng bằng Excel", "Nghe nhạc MP3"], correct: "Face ID mở khóa điện thoại" },
+        { q: "Công cụ Google Lens sử dụng công nghệ AI nào để tương tác với người dùng?", options: ["Tìm kiếm và xử lý bằng hình ảnh (Visual Search)", "Gõ bàn phím", "Tạo file Excel", "Chỉnh sửa tệp âm thanh"], correct: "Tìm kiếm và xử lý bằng hình ảnh (Visual Search)" },
+        { q: "Để bảo vệ dữ liệu cá nhân trên mạng xã hội, giải pháp nào là an toàn nhất?", options: ["Bật xác thực 2 bước (2FA) và dùng mật khẩu mạnh", "Dùng mật khẩu 123456", "Chia sẻ mật khẩu cho bạn bè", "Lưu mật khẩu ở máy công cộng"], correct: "Bật xác thực 2 bước (2FA) và dùng mật khẩu mạnh" },
+        { q: "Mạng LAN ảo trong hệ thống mạng máy tính được viết tắt là gì?", options: ["VLAN", "WAN", "MAN", "PAN"], correct: "VLAN" },
+        { q: "Loại cáp mạng chuẩn tối thiểu khuyên dùng cho mạng LAN trường học hiện nay là gì?", options: ["Cáp CAT6", "Cáp điện thoại", "Dây điện trần", "Cáp đồng trần"], correct: "Cáp CAT6" },
+        { q: "Đơn vị đo dung lượng dữ liệu nhỏ nhất trong máy tính là gì?", options: ["Bit", "Byte", "KB", "MB"], correct: "Bit" },
+        { q: "Địa chỉ IP dùng để làm gì trong mạng Internet?", options: ["Xác định duy nhất vị trí/máy tính kết nối trong mạng", "Đo tốc độ quạt chip", "Tăng độ sáng màn hình", "Lưu trữ video"], correct: "Xác định duy nhất vị trí/máy tính kết nối trong mạng" },
+        { q: "Một tệp tin audio được chuyển đổi từ sóng âm thanh tự nhiên sang máy tính dưới dạng gì?", options: ["Dãy bit (0 và 1)", "Hình ảnh động", "Sóng cơ học", "Văn bản thô"], correct: "Dãy bit (0 và 1)" },
+        { q: "Hệ thống tường lửa (Firewall) trong mạng máy tính dùng để làm gì?", options: ["Lọc gói tin, ngăn chặn truy cập trái phép và bảo vệ an ninh mạng", "Tăng tốc độ gõ phím", "Sạc pin tự động", "Làm mát máy tính"], correct: "Lọc gói tin, ngăn chặn truy cập trái phép và bảo vệ an ninh mạng" },
+        { q: "Mô hình dịch vụ lưu trữ đám mây cho phép nhiều người cùng chỉnh sửa văn bản trực tuyến là gì?", options: ["Google Docs / Google Slides", "Notepad offline", "Paint", "Calculator"], correct: "Google Docs / Google Slides" },
+        { q: "Mật khẩu nào sau đây được coi là mật khẩu mạnh?", options: ["T@n1234#TinHoc", "123456", "password", "abcde"], correct: "T@n1234#TinHoc" },
+        { q: "Thiết bị Router đóng vai trò gì trong mạng?", options: ["Định tuyến và kết nối các mạng máy tính khác nhau ra Internet", "In ấn tài liệu", "Hiển thị hình ảnh", "Phát âm thanh"], correct: "Định tuyến và kết nối các mạng máy tính khác nhau ra Internet" },
+        { q: "Khái niệm AI tạo sinh (Generative AI) được hiểu là gì?", options: ["Mô hình AI có khả năng tạo ra nội dung mới như văn bản, hình ảnh, âm thanh từ dữ liệu huấn luyện", "Máy in 3D", "Phần mềm diệt virus", "Bàn phím cơ"], correct: "Mô hình AI có khả năng tạo ra nội dung mới như văn bản, hình ảnh, âm thanh từ dữ liệu huấn luyện" },
+        { q: "Đâu là nguy cơ an ninh mạng phổ biến khi truy cập Wi-Fi công cộng không có mật khẩu?", options: ["Bị nghe lén và đánh cắp thông tin cá nhân/tài khoản", "Máy tính bị nặng thêm 1kg", "Màn hình tự động đổi màu", "Tăng dung lượng ổ cứng"], correct: "Bị nghe lén và đánh cắp thông tin cá nhân/tài khoản" },
+        { q: "Hành vi nào vi phạm đạo đức và pháp luật trên không gian mạng?", options: ["Phát tán tin giả, mã độc hoặc đánh cắp tài khoản cá nhân", "Học lập trình online", "Tải tài liệu học tập miễn phí hợp pháp", "Gửi email cho giáo viên"], correct: "Phát tán tin giả, mã độc hoặc đánh cắp tài khoản cá nhân" },
+        { q: "Trong mạng LAN, Switch dùng để làm gì?", options: ["Kết nối các thiết bị trong cùng một mạng cục bộ", "Chuyển đổi tín hiệu tivi", "Lưu trữ dữ liệu vĩnh viễn", "Phát sóng vô tuyến"], correct: "Kết nối các thiết bị trong cùng một mạng cục bộ" },
+        { q: "Công cụ Prompt Engineering trong ứng dụng AI có nghĩa là gì?", options: ["Kỹ thuật đặt câu lệnh/nhắc hiệu quả để khai thác AI", "Lập trình phần cứng", "Sửa chữa màn hình", "Lắp ráp máy tính"], correct: "Kỹ thuật đặt câu lệnh/nhắc hiệu quả để khai thác AI" },
+        { q: "Thiết bị Access Point (AP) dùng để làm gì?", options: ["Phát sóng kết nối không dây (Wi-Fi) cho các thiết bị", "Lưu trữ cơ sở dữ liệu", "Chấm điểm tự động", "Cắt dây mạng"], correct: "Phát sóng kết nối không dây (Wi-Fi) cho các thiết bị" },
+        { q: "Để tìm kiếm chính xác một cụm từ trên Google, ta đặt cụm từ đó trong dấu gì?", options: ["Dấu ngoặc kép ( \"...\" )", "Dấu ngoặc đơn", "Dấu ngoặc vuông", "Dấu phần trăm"], correct: "Dấu ngoặc kép ( \"...\" )" }
+    ];
+
+    // NGÂN HÀNG CÂU HỎI PHẦN II (4 CÂU ĐÚNG/SAI)
+    const bankPart2 = [
+        {
+            q: "Câu 1: Xét về mô hình hoạt động của giao thức TCP/IP trong mạng Internet:",
+            statements: [
+                { text: "a) Giao thức IP chịu trách nhiệm chia nhỏ dữ liệu thành các gói tin mini.", correct: false },
+                { text: "b) Giao thức TCP chịu trách nhiệm kiểm tra lỗi, đảm bảo các gói tin được lắp ráp nguyên vẹn tại máy nhận.", correct: true },
+                { text: "c) Mỗi thiết bị khi tham gia vào mạng Internet đều được cấp một địa chỉ IP duy nhất.", correct: true },
+                { text: "d) Các gói tin nhỏ được tạo ra bởi TCP luôn phải đi theo cùng một đường truyền cố định để đến đích.", correct: false }
+            ]
+        },
+        {
+            q: "Câu 2: Xét về thiết kế cấu trúc mạng LAN cho một trường THPT:",
+            statements: [
+                { text: "a) Việc chia các mạng LAN ảo (VLAN) giúp phân tách lưu lượng giữa khối quản lý hành chính và phòng thực hành học sinh.", correct: true },
+                { text: "b) Core Switch là thiết bị đóng vai trò chuyển mạch trung tâm hiệu năng cao.", correct: true },
+                { text: "c) Hệ thống Wi-Fi dành cho học sinh/khách nên được dùng chung SSID và cùng phân vùng bảo mật với hệ thống quản lý điểm của nhà trường.", correct: false },
+                { text: "d) Tường lửa (Firewall) giúp ngăn chặn các truy cập độc hại và lọc nội dung web không phù hợp.", correct: true }
+            ]
+        },
+        {
+            q: "Câu 3: Xét về việc ứng dụng Trí tuệ nhân tạo (AI) trong đời sống và quân sự:",
+            statements: [
+                { text: "a) AI có thể ứng dụng trong tìm kiếm bằng hình ảnh (Visual Search) và mở khóa bằng khuôn mặt (Face ID).", correct: true },
+                { text: "b) Việc giao toàn quyền quyết định cho AI điều khiển vũ khí sát thương là an toàn vì AI không bao giờ gặp sự cố.", correct: false },
+                { text: "c) AI tạo sinh (Generative AI) có khả năng tổng hợp và tạo ra văn bản, hình ảnh mới dựa trên dữ liệu huấn luyện.", correct: true },
+                { text: "d) Thông tin do AI tạo ra luôn chính xác tuyệt đối 100% nên không cần kiểm chứng lại.", correct: false }
+            ]
+        },
+        {
+            q: "Câu 4: Xét về an toàn thông tin và bảo mật dữ liệu cá nhân trên mạng:",
+            statements: [
+                { text: "a) Mật khẩu chứa cả chữ hoa, chữ thường, số và ký tự đặc biệt có độ an toàn cao hơn mật khẩu chỉ toàn số.", correct: true },
+                { text: "b) Khi sử dụng Wi-Fi công cộng tại quán cà phê, thực hiện các giao dịch chuyển tiền ngân hàng là hoàn toàn an toàn tuyệt đối.", correct: false },
+                { text: "c) Bật tính năng xác thực 2 yếu tố (2FA) giúp tăng cường bảo mật cho tài khoản cá nhân.", correct: true },
+                { text: "d) Tệp đính kèm có đuôi .exe từ email người lạ là an toàn và nên mở ra ngay để kiểm tra.", correct: false }
+            ]
+        }
+    ];
+
+    let studentName = "";
+    let studentClass = "";
+    let currentP1 = [];
+    let currentP2 = [];
+    let finalScoreP1 = 0;
+    let finalScoreP2 = 0;
+    let totalScore10 = 0;
+
+    function shuffle(arr) {
+        let a = [...arr];
+        for (let i = a.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+    }
+
+    // BẮT ĐẦU LÀM BÀI KHỦNG ĐĂNG NHẬP
+    function startExam() {
+        studentName = document.getElementById('student-name').value.trim();
+        studentClass = document.getElementById('student-class').value;
+
+        if (!studentName || !studentClass) {
+            alert("Vui lòng nhập đầy đủ Họ và tên và Chọn Lớp trước khi bắt đầu!");
+            return;
+        }
+
+        document.getElementById('login-section').style.display = 'none';
+        document.getElementById('quiz-form').style.display = 'block';
+
+        generateExam();
+    }
+
+    function generateExam() {
+        currentP1 = shuffle(bankPart1).slice(0, 24);
+        currentP2 = shuffle(bankPart2).slice(0, 4);
+        renderExam();
+    }
+
+    function renderExam() {
+        const p1Container = document.getElementById('part1-container');
+        p1Container.innerHTML = '';
+        currentP1.forEach((qObj, idx) => {
+            const shuffledOpts = shuffle(qObj.options);
+            let optsHtml = '';
+            shuffledOpts.forEach(opt => {
+                optsHtml += `
+                    <label class="option-label">
+                        <input type="radio" name="p1_q${idx}" value="${opt}">
+                        <span>${opt}</span>
+                    </label>
+                `;
+            });
+            const card = document.createElement('div');
+            card.className = 'question-card';
+            card.innerHTML = `<div class="q-title">Câu ${idx + 1}: ${qObj.q}</div><div class="options-group">${optsHtml}</div>`;
+            p1Container.appendChild(card);
+        });
+
+        const p2Container = document.getElementById('part2-container');
+        p2Container.innerHTML = '';
+        currentP2.forEach((qObj, idx) => {
+            let rowsHtml = '';
+            qObj.statements.forEach((st, sIdx) => {
+                rowsHtml += `
+                    <tr>
+                        <td>${st.text}</td>
+                        <td class="tf-radio"><input type="radio" name="p2_q${idx}_s${sIdx}" value="true"></td>
+                        <td class="tf-radio"><input type="radio" name="p2_q${idx}_s${sIdx}" value="false"></td>
+                    </tr>
+                `;
+            });
+            const card = document.createElement('div');
+            card.className = 'question-card';
+            card.innerHTML = `
+                <div class="q-title">Câu ${idx + 1} (Đúng/Sai): ${qObj.q}</div>
+                <table class="tf-table">
+                    <thead>
+                        <tr>
+                            <th>Nội dung phát biểu</th>
+                            <th>Đúng</th>
+                            <th>Sai</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rowsHtml}</tbody>
+                </table>
+            `;
+            p2Container.appendChild(card);
+        });
+    }
+
+    function submitQuiz() {
+        finalScoreP1 = 0;
+        finalScoreP2 = 0;
+
+        currentP1.forEach((qObj, idx) => {
+            const selected = document.querySelector(`input[name="p1_q${idx}"]:checked`);
+            if (selected && selected.value === qObj.correct) {
+                finalScoreP1++;
+            }
+        });
+
+        currentP2.forEach((qObj, idx) => {
+            qObj.statements.forEach((st, sIdx) => {
+                const selected = document.querySelector(`input[name="p2_q${idx}_s${sIdx}"]:checked`);
+                if (selected && (selected.value === 'true') === st.correct) {
+                    finalScoreP2++;
+                }
+            });
+        });
+
+        // Quy đổi sang thang điểm 10 (P1: 6 điểm, P2: 4 điểm)
+        totalScore10 = ((finalScoreP1 / 24) * 6 + (finalScoreP2 / 16) * 4).toFixed(2);
+
+        document.getElementById('quiz-form').style.display = 'none';
+        document.getElementById('result-area').style.display = 'block';
+
+        document.getElementById('res-student-info').innerText = `Họ tên: ${studentName} | Lớp: ${studentClass}`;
+        document.getElementById('score-text').innerText = `Tổng điểm: ${totalScore10} / 10 điểm`;
+        document.getElementById('feedback-text').innerText = 
+            `Chi tiết: Đúng ${finalScoreP1}/24 câu Phần I và ${finalScoreP2}/16 ý Phần II.`;
+    }
+
+    // TẠO FILE TẢI KẾT QUẢ ĐIỂM CHO GIÁO VIÊN
+    function exportToCSV() {
+        const csvContent = "data:text/csv;charset=utf-8,\uFEFF" 
+            + "Họ và Tên,Lớp,Phần I (Đúng/24),Phần II (Đúng/16),Tổng Điểm (Thang 10)\n"
+            + `"${studentName}","${studentClass}",${finalScoreP1},${finalScoreP2},${totalScore10}\n`;
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `KiemTra_${studentClass}_${studentName.replace(/\s+/g, '_')}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    function resetExam() {
+        document.getElementById('result-area').style.display = 'none';
+        document.getElementById('login-section').style.display = 'block';
+    }
+</script>
+
+</body>
+</html>
